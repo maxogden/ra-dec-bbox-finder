@@ -100,7 +100,7 @@ $(document).ready(function() {
     var ymin = southwest.lat.toFixed(6)
     var xmax = (northeast.lng + 180).toFixed(6)
     var ymax = northeast.lat.toFixed(6)
-    location.hash = ymin+','+xmin+','+ymax+','+xmax
+    location.hash = xmin+','+ymin+','+xmax+','+ymax
   })
   map.addLayer(bounds)
   
@@ -151,8 +151,10 @@ $(document).ready(function() {
   if (initialBBox) {
     if (validateStringAsBounds(initialBBox)) {
       var splitBounds = initialBBox.split(',')
-      startBounds = new L.LatLngBounds([splitBounds[1] - 180,splitBounds[0]],
-                       [splitBounds[3] - 180,splitBounds[2]])
+      startBounds = new L.LatLngBounds(
+        [splitBounds[1], splitBounds[0] - 180],
+        [splitBounds[3], splitBounds[2] - 180]
+      )
       createBox(startBounds)
       setTimeout(function() {
         map.fitBounds(drawnItems.getBounds())
