@@ -153,7 +153,7 @@ $(document).ready(function() {
       var splitBounds = initialBBox.split(',')
       startBounds = new L.LatLngBounds([splitBounds[0],splitBounds[1] - 180],
                        [splitBounds[2],splitBounds[3] - 180])
-      map.fitBounds(bounds.getBounds())
+      map.fitBounds(startBounds.getBounds())
       createBox(startBounds)
     } else {
       // This will reset the hash if the original hash was not valid
