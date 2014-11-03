@@ -52,10 +52,10 @@ function validateStringAsBounds(bounds) {
   var splitBounds = bounds ? bounds.split(',') : null
   return ((splitBounds !== null) &&
     (splitBounds.length == 4) &&
-    ((-90.0 <= parseFloat(splitBounds[0]) <= 90.0) &&
-      (-180.0 <= parseFloat(splitBounds[1]) - 180 <= 180.0) &&
-      (-90.0 <= parseFloat(splitBounds[2]) <= 90.0) &&
-      (-180.0 <= parseFloat(splitBounds[3]) - 180 <= 180.0)) &&
+    ((-90.0 <= parseFloat(splitBounds[1]) <= 90.0) &&
+      (-180.0 <= parseFloat(splitBounds[0]) - 180 <= 180.0) &&
+      (-90.0 <= parseFloat(splitBounds[3]) <= 90.0) &&
+      (-180.0 <= parseFloat(splitBounds[2]) - 180 <= 180.0)) &&
     (parseFloat(splitBounds[0]) < parseFloat(splitBounds[2]) &&
       parseFloat(splitBounds[1]) < parseFloat(splitBounds[3])))
 }
@@ -151,8 +151,8 @@ $(document).ready(function() {
   if (initialBBox) {
     if (validateStringAsBounds(initialBBox)) {
       var splitBounds = initialBBox.split(',')
-      startBounds = new L.LatLngBounds([splitBounds[0],splitBounds[1] - 180],
-                       [splitBounds[2],splitBounds[3] - 180])
+      startBounds = new L.LatLngBounds([splitBounds[1] - 180,splitBounds[0]],
+                       [splitBounds[3] - 180,splitBounds[2]])
       createBox(startBounds)
       setTimeout(function() {
         map.fitBounds(drawnItems.getBounds())
