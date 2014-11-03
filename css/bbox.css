@@ -109,7 +109,7 @@ html, body, #map {
   padding-left:5px;
 }
 .bboxllpos { width:350px; }
-.bboxllpossmall { width:200px; }
+.bboxllpossmall { width:310px; }
 .bboxprojpos { width:450px; }
 .bboxprojpossmall { width:250px; }
 .tilesmall { width:60px; }

@@ -5,35 +5,31 @@ var map, rsidebar, lsidebar, drawControl, drawnItems = null;
 var currentmouse = L.latLng(0,0);
 
 function formatBounds(bounds) {
-    var formattedBounds = '';
-    var southwest = bounds.getSouthWest();
-    var northeast = bounds.getNorthEast();
-    var xmin = 0;
-    var ymin = 0;
-    var xmax = 0;
-    var ymax = 0;   
-    xmin = southwest.lng.toFixed(6);
-    ymin = southwest.lat.toFixed(6);
-    xmax = northeast.lng.toFixed(6);
-    ymax = northeast.lat.toFixed(6);
-
-    var formattedBounds = xmin+','+ymin+','+xmax+','+ymax;
-
-    return formattedBounds
-}
-
-function formatTile(point,zoom) {
-    var xTile = Math.floor((point.lng+180)/360*Math.pow(2,zoom));
-    var yTile = Math.floor((1-Math.log(Math.tan(point.lat*Math.PI/180) + 1/Math.cos(point.lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom));
-    return xTile.toString() + ',' + yTile.toString();
+    var southwest = bounds.getSouthWest()
+    var northeast = bounds.getNorthEast()
+    var xmin = (southwest.lng + 180).toFixed(6)
+    var ymin = southwest.lat.toFixed(6)
+    var xmax = (northeast.lng + 180).toFixed(6)
+    var ymax = northeast.lat.toFixed(6)
+    var fmt = $("input[name='coord-format']:checked").val()
+    if (fmt === 'hms') {
+      xmin = equatorial.raDeg2Hms(southwest.lng + 180, true)
+      ymin = equatorial.decDeg2Hms(southwest.lat, true)
+      xmax = equatorial.raDeg2Hms(northeast.lng + 180, true)
+      ymax = equatorial.decDeg2Hms(northeast.lat, true)
+    }
+    return [xmin, ymin, xmax, ymax].join(',')
 }
 
 function formatPoint(point) {
-    var x = point.lng.toFixed(6)
-    var y = point.lat.toFixed(6)
-    var dec = equatorial.decDeg2Hms(point.lat)
-    var ra = equatorial.raDeg2Hms(point.lng)
-    var formattedBounds = [y,x].join(',')
+    var x = point.lng + 180
+    var y = point.lat
+    var fmt = $("input[name='coord-format']:checked").val()
+    if (fmt === 'hms') {
+      x = equatorial.raDeg2Hms(point.lng + 180, true)
+      y = equatorial.decDeg2Hms(point.lat, true)
+    }
+    var formattedBounds = [x,y].join(',')
     return formattedBounds
 }
 
@@ -42,9 +38,9 @@ function validateStringAsBounds(bounds) {
     return ((splitBounds !== null) &&
             (splitBounds.length == 4) &&
             ((-90.0 <= parseFloat(splitBounds[0]) <= 90.0) &&
-             (-180.0 <= parseFloat(splitBounds[1]) <= 180.0) &&
+             (-180.0 <= parseFloat(splitBounds[1]) - 180 <= 180.0) &&
              (-90.0 <= parseFloat(splitBounds[2]) <= 90.0) &&
-             (-180.0 <= parseFloat(splitBounds[3]) <= 180.0)) &&
+             (-180.0 <= parseFloat(splitBounds[3]) - 180 <= 180.0)) &&
             (parseFloat(splitBounds[0]) < parseFloat(splitBounds[2]) &&
              parseFloat(splitBounds[1]) < parseFloat(splitBounds[3])))
 }
@@ -93,9 +89,9 @@ $(document).ready(function() {
         // Set the hash
         var southwest = this.getBounds().getSouthWest();
         var northeast = this.getBounds().getNorthEast();
-        var xmin = southwest.lng.toFixed(6);
+        var xmin = (southwest.lng + 180).toFixed(6);
         var ymin = southwest.lat.toFixed(6);
-        var xmax = northeast.lng.toFixed(6);
+        var xmax = (northeast.lng + 180).toFixed(6);
         var ymax = northeast.lat.toFixed(6);
         location.hash = ymin+','+xmin+','+ymax+','+xmax;
     });
@@ -125,7 +121,6 @@ $(document).ready(function() {
     
     function display() {
         $('.zoomlevel').text(map.getZoom().toString());
-        $('.tilelevel').text(formatTile(new L.LatLng(0, 0),map.getZoom()));
         $('#mapbounds').text(formatBounds(map.getBounds()));
         $('#mapboundsmerc').text(formatBounds(map.getBounds()));
         $('#center').text(formatPoint(map.getCenter()))
@@ -140,7 +135,6 @@ $(document).ready(function() {
     map.on('mousemove', function(e) {
         currentmouse.lat = e.latlng.lat;
         currentmouse.lng = e.latlng.lng;
-        $('.tilelevel').text(formatTile(e.latlng,map.getZoom()));
         $('#mousepos').text(formatPoint(e.latlng));
         $('#mouseposmerc').text(formatPoint(e.latlng));
         $('#mapbounds').text(formatBounds(map.getBounds()));
@@ -149,7 +143,6 @@ $(document).ready(function() {
         $('#centermerc').text(formatPoint(map.getCenter()));
     });
     map.on('zoomend', function(e) {
-        $('.tilelevel').text(formatTile(currentmouse,map.getZoom()));
         $('.zoomlevel').text(map.getZoom().toString());
         $('#mapbounds').text(formatBounds(map.getBounds()));
         $('#mapboundsmerc').text(formatBounds(map.getBounds()));
@@ -159,8 +152,8 @@ $(document).ready(function() {
     if (initialBBox) {
         if (validateStringAsBounds(initialBBox)) {
             var splitBounds = initialBBox.split(',');
-            startBounds = new L.LatLngBounds([splitBounds[0],splitBounds[1]],
-                                             [splitBounds[2],splitBounds[3]]);
+            startBounds = new L.LatLngBounds([splitBounds[0],splitBounds[1] - 180],
+                                             [splitBounds[2],splitBounds[3] - 180]);
             var lyr = new L.Rectangle( startBounds );    
             var evt = {
                 layer : lyr,
