@@ -5,6 +5,9 @@ html, body, #map {
    margin:0px;
    font-family: "Courier New", Courier, monospace;
 } 
+.leaflet-draw-edit-edit {
+  background-position: -115px !important;
+}
 #info-box {
   position:absolute;
   width:100%;
